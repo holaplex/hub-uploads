@@ -1,6 +1,9 @@
 FROM node:20-alpine AS base
 WORKDIR /app
-COPY package*.json ./
+RUN addgroup -g 10000 uploader && adduser -u 10000 -G uploader -s /bin/sh -D uploader
+RUN chown -R uploader:uploader /app
+USER uploader
+COPY --chown=uploader:uploader package*.json ./
 
 FROM base AS dependencies
 RUN npm set progress=false && npm config set depth 0 && \
@@ -10,11 +13,10 @@ RUN npm install
 
 FROM dependencies AS build
 ENV NODE_ENV=production
-COPY . .
+COPY --chown=uploader:uploader . .
 
-# --- Release ----
 FROM base AS release
 COPY --from=dependencies /app/prod_node_modules ./node_modules
-COPY . .
+COPY --chown=uploader:uploader . .
 EXPOSE 3000
 CMD ["npm","start"]
