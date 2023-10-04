@@ -1,0 +1,20 @@
+{
+  "name": "hub-uploads",
+  "version": "1.0.0",
+  "description": "HUB file uploads services wrapper for web3 up.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/multipart": "^8.0.0",
+    "@ipld/car": "^5.2.4",
+    "@ucanto/principal": "^8.1.0",
+    "@web3-storage/w3up-client": "^8.0.3",
+    "fastify": "^4.23.2"
+  }
+}
