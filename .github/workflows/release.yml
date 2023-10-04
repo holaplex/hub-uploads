@@ -2,7 +2,6 @@ name: Release Image
 on:
   push:
     branches:
-      - mpw/cicd
       - main
       - release
     paths-ignore:
@@ -15,7 +14,7 @@ concurrency:
 env:
   SERVICE_NAME: uploads
   CACHE_CONFIG: type=s3,region=${{ vars.AWS_REGION }},bucket=${{ vars.AWS_BUCKET }},access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }},secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  DOCKERHUB_REPO: ${{ vars.DOCKERHUB_ORG }}/${{ env.SERVICE_NAME }}
+  DOCKERHUB_REPO: ${{ vars.DOCKERHUB_ORG }}/${{ github.event.repository.name }}
 
 jobs:
   build:
@@ -50,17 +49,18 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Build and push ${{ env.SERVICE_NAME }}
+      - name: Build and push ${{ github.event.repository.name }}
         uses: docker/build-push-action@v3
         with:
           context: .
           file: ./Dockerfile
+
           push: true
           provenance: false
           platforms: linux/${{ matrix.arch }}
           tags: ${{ env.DOCKERHUB_REPO }}:latest-${{ matrix.arch }}
-          cache-from: ${{ env.CACHE_CONFIG }},prefix=buildx/${{ env.SERVICE_NAME }}/${{ matrix.arch }}/
-          cache-to: ${{ env.CACHE_CONFIG }},prefix=buildx/${{ env.SERVICE_NAME }}/${{ matrix.arch }}/,mode=max
+          cache-from: ${{ env.CACHE_CONFIG }},prefix=buildx/hub-ui/${{ matrix.arch }}/
+          cache-to: ${{ env.CACHE_CONFIG }},prefix=buildx/hub-ui/${{ matrix.arch }}/,mode=max
 
   finalize:
     needs: build
