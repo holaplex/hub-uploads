@@ -2,6 +2,7 @@ name: Release Image
 on:
   push:
     branches:
+      - mpw/cicd
       - main
       - release
     paths-ignore:
@@ -59,8 +60,8 @@ jobs:
           provenance: false
           platforms: linux/${{ matrix.arch }}
           tags: ${{ env.DOCKERHUB_REPO }}:latest-${{ matrix.arch }}
-          cache-from: ${{ env.CACHE_CONFIG }},prefix=buildx/hub-ui/${{ matrix.arch }}/
-          cache-to: ${{ env.CACHE_CONFIG }},prefix=buildx/hub-ui/${{ matrix.arch }}/,mode=max
+          cache-from: ${{ env.CACHE_CONFIG }},prefix=buildx/${{ github.event.repository.name }}/${{ matrix.arch }}/
+          cache-to: ${{ env.CACHE_CONFIG }},prefix=buildx/${{ github.event.repository.name }}/${{ matrix.arch }}/,mode=max
 
   finalize:
     needs: build
