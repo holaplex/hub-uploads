@@ -153,7 +153,7 @@ fastify.post(
 try {
   await fastify.ready();
   fastify.swagger();
-  await fastify.listen({ port: fastify.config.PORT, bind: "0.0.0.0" });
+  await fastify.listen({ port: fastify.config.PORT, host: "0.0.0.0" });
 } catch (err) {
   // Log error and exit process if server fails to start
   fastify.log.error(err);
