@@ -46,7 +46,7 @@ await fastify.register(fastifyMultiPart, {
   limits: {
     fields: 0, // Max number of non-file fields
     files: 1, // Max number of file fields
-    fileSize: 1024 * 1024 * 1000, // Max file size in bytes
+    fileSize: 1024 * 1024 * 250, // Max file size in bytes
   },
 });
 
