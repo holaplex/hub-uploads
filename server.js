@@ -3,9 +3,13 @@ import fastifyMultiPart from "@fastify/multipart";
 import fastifySwagger from "@fastify/swagger";
 import fastifyEnv from "@fastify/env";
 import fastifySwaggerUi from "@fastify/swagger-ui";
+import fastifyHttpProxy from "@fastify/http-proxy";
 
 import { w3 } from "./web3.js";
 import createError from "@fastify/error";
+
+import Metrics from "./metrics.js";
+const { FileUploadTime } = Metrics.initialize();
 
 const UploadError = createError(
   "UPLOAD_ERROR",
@@ -39,6 +43,12 @@ await fastify.register(fastifyEnv, {
       },
     },
   },
+});
+
+// add proxy to the prometheus metrics endpoint
+await fastify.register(fastifyHttpProxy, {
+  upstream: "http://localhost:9464/metrics",
+  prefix: "/metrics",
 });
 
 // Register multipart plugin with limits
@@ -133,19 +143,22 @@ fastify.post(
       reply.status(400).send(request.validationError);
       return;
     }
-
+    //metrics
+    let upload_status = "FAILED";
+    const start = Date.now();
     try {
       // Get file from request and convert to buffer
       const data = await request.file();
       const buffer = await data.toBuffer();
       // Upload file and get results
       const results = await uploader.uploadFile(buffer);
-
-      // Send results as response
       reply.send(results);
+      upload_status = "COMPLETED";
     } catch {
       // Send upload error as response if any error occurs
       reply.send(new UploadError());
+    } finally {
+      FileUploadTime.record(Date.now() - start, { upload_status });
     }
   }
 );

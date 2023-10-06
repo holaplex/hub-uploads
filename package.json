@@ -13,10 +13,15 @@
   "dependencies": {
     "@fastify/env": "^4.2.0",
     "@fastify/error": "^3.4.0",
+    "@fastify/http-proxy": "^9.2.1",
     "@fastify/multipart": "^8.0.0",
     "@fastify/swagger": "^8.11.0",
     "@fastify/swagger-ui": "^1.10.0",
     "@ipld/car": "^5.2.4",
+    "@opentelemetry/exporter-prometheus": "^0.43.0",
+    "@opentelemetry/host-metrics": "^0.33.1",
+    "@opentelemetry/sdk-metrics": "^1.17.0",
+    "@opentelemetry/sdk-node": "^0.43.0",
     "@ucanto/principal": "^8.1.0",
     "@web3-storage/w3up-client": "^8.0.3",
     "fastify": "^4.23.2"
