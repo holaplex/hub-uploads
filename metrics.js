@@ -1,4 +1,3 @@
-// Import dependencies with more descriptive names
 import { MeterProvider } from "@opentelemetry/sdk-metrics";
 import { PrometheusExporter } from "@opentelemetry/exporter-prometheus";
 
