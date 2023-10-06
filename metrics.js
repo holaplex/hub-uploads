@@ -7,8 +7,8 @@ const config = {
   port: 9464,
   meterName: "hub-uploads",
   histogramConfig: {
-    name: "hub_uploads_file_upload_time",
-    description: "Time for file upload",
+    name: "hub_uploads_upload_time_milliseconds",
+    description: "Time in milliseconds for a file upload",
     unit: "ms",
     boundaries: [100, 200, 400, 800, 1600],
     labelKeys: ["status"],
