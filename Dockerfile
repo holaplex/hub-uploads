@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:19-alpine AS base
 WORKDIR /app
 ENV HOME=/app
 RUN addgroup -g 10000 uploader && adduser -u 10000 -G uploader -s /bin/sh -D uploader
