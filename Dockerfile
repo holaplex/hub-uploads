@@ -18,6 +18,6 @@ COPY --chown=uploader:uploader . .
 
 FROM base AS release
 COPY --from=dependencies /app/prod_node_modules ./node_modules
-COPY --chown=uploader:uploader . .
+COPY --chown=uploader:uploader package*.json server.js bundlr.js metrics.js ./
 EXPOSE 3000
 CMD ["npm","start"]

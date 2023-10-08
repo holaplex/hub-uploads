@@ -1,20 +1,20 @@
 # HUB Upload API
 
-This is the Upload API for HUB. It allows users to upload files to the server.
+This is the Upload API for HUB. It allows users to upload files to the server using the Bundlr service.
 
 ## Setup
 
 To setup the server, follow these steps:
 
 1. Install the dependencies by running `npm install`
-2. Set the environment variables `WEB3_UP_KEY`, `WEB3_UP_PROOF`, and `WEB3_UP_GATEWAY`. Note that `WEB3_UP_GATEWAY` should be an IPFS compatible gateway for retrieving assets over HTTP.
+2. Set the environment variables `IRYS_GATEWAY`, `IRYS_URL`, `SOLANA_RPC_URL`, and `SOLANA_KEYPAIR`. Note that `IRYS_GATEWAY` should be an Arweave compatible gateway for retrieving assets over HTTP.
 3. Start the server by running `npm start`
 
 ## Routes
 
 The available routes are:
 
-- POST /uploads: Upload a file. This route consumes multipart/form-data and returns the URI and CID of the uploaded file.
+- POST /uploads: Upload a file or JSON. This route accepts either a file as multipart/form-data or a JSON object and returns the URI and CID of the uploaded file.
 
 ## Swagger Documentation
 
