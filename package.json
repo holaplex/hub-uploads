@@ -22,6 +22,7 @@
     "@opentelemetry/host-metrics": "^0.33.1",
     "@opentelemetry/sdk-metrics": "^1.17.0",
     "@opentelemetry/sdk-node": "^0.43.0",
+    "@irys/sdk": "^0.0.2",
     "@ucanto/principal": "^8.1.0",
     "@web3-storage/w3up-client": "^8.0.3",
     "fastify": "^4.23.2"

@@ -4,9 +4,8 @@ import fastifySwagger from "@fastify/swagger";
 import fastifyEnv from "@fastify/env";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import fastifyHttpProxy from "@fastify/http-proxy";
-
-import { w3 } from "./web3.js";
 import createError from "@fastify/error";
+import { irys } from "./bundlr.js";
 
 import Metrics from "./metrics.js";
 const { FileUploadTime } = Metrics.initialize();
@@ -26,15 +25,18 @@ await fastify.register(fastifyEnv, {
   dotenv: true,
   schema: {
     type: "object",
-    required: ["WEB3_UP_PROOF", "WEB3_UP_KEY", "WEB3_UP_GATEWAY"],
+    required: ["SOLANA_KEYPAIR", "SOLANA_RPC_URL", "IRYS_URL", "IRYS_GATEWAY"],
     properties: {
-      WEB3_UP_PROOF: {
+      SOLANA_PPC_URL: {
         type: "string",
       },
-      WEB3_UP_KEY: {
+      SOLANA_KEYPAIR: {
         type: "string",
       },
-      WEB3_UP_GATEWAY: {
+      IRYS_URL: {
+        type: "string",
+      },
+      IRYS_GATEWAY: {
         type: "string",
       },
       PORT: {
@@ -107,10 +109,11 @@ await fastify.register(fastifySwaggerUi, {
 });
 
 // Initialize uploader with environment variables
-const uploader = await w3(
-  fastify.config.WEB3_UP_KEY,
-  fastify.config.WEB3_UP_PROOF,
-  fastify.config.WEB3_UP_GATEWAY
+const uploader = irys(
+  fastify.config.IRYS_GATEWAY,
+  fastify.config.IRYS_URL,
+  fastify.config.SOLANA_RPC_URL,
+  fastify.config.SOLANA_KEYPAIR
 );
 
 // Health check endpoint
@@ -123,9 +126,9 @@ fastify.post(
   "/uploads",
   {
     schema: {
-      description: "Upload a file",
+      description: "Upload a file or JSON",
       tags: ["file"],
-      consumes: ["multipart/form-data"],
+      consumes: ["multipart/form-data", "application/json"],
       response: {
         200: {
           description: "File uploaded successfully",
@@ -143,18 +146,29 @@ fastify.post(
       reply.status(400).send(request.validationError);
       return;
     }
-    //metrics
     let upload_status = "FAILED";
     const start = Date.now();
     try {
-      // Get file from request and convert to buffer
-      const data = await request.file();
-      const buffer = await data.toBuffer();
-      // Upload file and get results
-      const results = await uploader.uploadFile(buffer);
-      reply.send(results);
-      upload_status = "COMPLETED";
-    } catch {
+      // Check if request is multipart
+      if (request.isMultipart()) {
+        // Get file from request and convert to buffer
+        const data = await request.file();
+        const buffer = await data.toBuffer();
+        const contentType = data.mimetype;
+
+        const results = await uploader.upload(buffer, contentType);
+
+        reply.send(results);
+      } else {
+        const buffer = Buffer.from(JSON.stringify(request.body));
+
+        const results = await uploader.upload(buffer, "application/json");
+
+        reply.send(results);
+        upload_status = "COMPLETED";
+      }
+    } catch (err) {
+      fastify.log.error(err);
       // Send upload error as response if any error occurs
       reply.send(new UploadError());
     } finally {
@@ -162,6 +176,20 @@ fastify.post(
     }
   }
 );
+
+fastify.post("/fund/:bytes", {}, async function handler(request, reply) {
+  const { bytes } = request.params;
+
+  try {
+    const price = await uploader.fund(bytes);
+
+    reply.send({ price });
+  } catch (err) {
+    fastify.log.error(err);
+    // Send upload error as response if any error occurs
+    reply.send(new UploadError());
+  }
+});
 
 // Start the server
 try {
