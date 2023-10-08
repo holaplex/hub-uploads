@@ -165,7 +165,7 @@ fastify.post(
         const results = await uploader.upload(buffer, "application/json");
 
         reply.send(results);
-      upload_status = "COMPLETED";
+        upload_status = "COMPLETED";
       }
     } catch (err) {
       fastify.log.error(err);
