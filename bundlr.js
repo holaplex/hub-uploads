@@ -35,20 +35,17 @@ class Uploader {
 
     const response = await this.client.fund(price);
 
-    fastify.log.info(response);
+    console.log(response.message);
 
     return price;
   }
 }
 
-export function irys(gateway, url, providerUrl, key) {
+export function irys(gateway, url, key) {
   const irys = new Irys({
     url, // URL of the node you want to connect to
-    token: "solana", // Token used for payment
-    key, // ETH or SOL private key
-    config: {
-      providerUrl,
-    },
+    token: "arweave", // Token used for payment
+    key: JSON.parse(key),
   });
 
   return new Uploader(irys, gateway);
