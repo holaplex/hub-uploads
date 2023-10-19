@@ -14,6 +14,7 @@ const UploadError = createError(
   "UPLOAD_ERROR",
   "The upload was not successful"
 );
+const FundError = createError("FUND_ERROR", "The funding was not successful");
 
 // Initialize Fastify with logging enabled
 const fastify = Fastify({
@@ -25,12 +26,9 @@ await fastify.register(fastifyEnv, {
   dotenv: true,
   schema: {
     type: "object",
-    required: ["SOLANA_KEYPAIR", "SOLANA_RPC_URL", "IRYS_URL", "IRYS_GATEWAY"],
+    required: ["ARWEAVE_PRIVATE_KEY", "IRYS_URL", "IRYS_GATEWAY"],
     properties: {
-      SOLANA_PPC_URL: {
-        type: "string",
-      },
-      SOLANA_KEYPAIR: {
+      ARWEAVE_PRIVATE_KEY: {
         type: "string",
       },
       IRYS_URL: {
@@ -112,8 +110,7 @@ await fastify.register(fastifySwaggerUi, {
 const uploader = irys(
   fastify.config.IRYS_GATEWAY,
   fastify.config.IRYS_URL,
-  fastify.config.SOLANA_RPC_URL,
-  fastify.config.SOLANA_KEYPAIR
+  fastify.config.ARWEAVE_PRIVATE_KEY
 );
 
 // Health check endpoint
@@ -146,26 +143,27 @@ fastify.post(
       reply.status(400).send(request.validationError);
       return;
     }
+
     let upload_status = "FAILED";
     const start = Date.now();
+    let contentType;
+    let buffer;
+
     try {
       // Check if request is multipart
       if (request.isMultipart()) {
         // Get file from request and convert to buffer
         const data = await request.file();
-        const buffer = await data.toBuffer();
-        const contentType = data.mimetype;
-
-        const results = await uploader.upload(buffer, contentType);
-
-        reply.send(results);
+        buffer = await data.toBuffer();
+        contentType = data.mimetype;
       } else {
-        const buffer = Buffer.from(JSON.stringify(request.body));
-
-        const results = await uploader.upload(buffer, "application/json");
-
-        reply.send(results);
+        buffer = Buffer.from(JSON.stringify(request.body));
+        contentType = "application/json";
       }
+
+      const results = await uploader.upload(buffer, contentType);
+
+      reply.send(results);
       upload_status = "COMPLETED";
     } catch (err) {
       fastify.log.error(err);
@@ -187,7 +185,7 @@ fastify.post("/fund/:bytes", {}, async function handler(request, reply) {
   } catch (err) {
     fastify.log.error(err);
     // Send upload error as response if any error occurs
-    reply.send(new UploadError());
+    reply.send(new FundError());
   }
 });
 
